@@ -1,0 +1,18 @@
+# Ambiente virtual
+venv/
+.env/
+.venv/
+env/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Flask
+instance/
+*.log
+
+# VS Code
+.vscode/
+testes.py
