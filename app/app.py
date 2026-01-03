@@ -1,9 +1,11 @@
 from decimal import Decimal
 from datetime import datetime
 
+from dateutil.relativedelta import relativedelta
 from flask import Flask, request, jsonify, Response
 
 app = Flask(__name__)
+app.json.sort_keys = False
 
 db = []
 
@@ -43,8 +45,41 @@ def criar_transacao():
 def limpar_transacoes():
     global db
     db = []
-    
+
     return Response(status=200)
+
+@app.route("/estatisticas", methods=["GET"])
+def obter_estatisticas():
+    global db
+    db_filtro = []
+
+    agora_str = datetime.now().isoformat()
+    agora_datetime = datetime.fromisoformat(agora_str)
+    limite_de_tempo = agora_datetime - relativedelta(minutes=1)
+
+    dados = {
+        "count": "0",
+        "sum": "0",
+        "avg": "0",
+        "min": "0",
+        "max": "0"
+    }
+
+    for transacao in db:
+        if transacao["dataHora"] < limite_de_tempo: continue
+
+        db_filtro.append(transacao["valor"])
+    
+    if len(db_filtro) == 0: return jsonify(dados), 200
+        
+    dados["count"] = len(db_filtro)
+    dados["sum"] = sum(db_filtro)
+    dados["avg"] = round(sum(db_filtro) / len(db_filtro), 2)
+    dados["min"] = min(db_filtro)
+    dados["max"] = max(db_filtro)
+
+    return jsonify(dados), 200
+
 
 
 if __name__ == "__main__":
